@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Track My Way",
+    "slug": "track-my-way",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "trackmyway",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kral.trackmyway"
+    },
+    "android": {
+      "package": "com.kral.trackmyway"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
