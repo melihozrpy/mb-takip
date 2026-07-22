@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -16,9 +17,34 @@ const initialItems = [
   { id: '3', title: 'iOS build TestFlight icin alinacak', done: false }
 ];
 
+const STORAGE_KEY = 'mb-takip/items';
+
 export default function App() {
   const [items, setItems] = useState(initialItems);
   const [draft, setDraft] = useState('');
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const savedItems = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedItems) {
+          setItems(JSON.parse(savedItems));
+        }
+      } catch {
+        setItems(initialItems);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    loadItems();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [isLoaded, items]);
 
   const completedCount = useMemo(
     () => items.filter((item) => item.done).length,
@@ -55,7 +81,7 @@ export default function App() {
           <Text style={styles.kicker}>MB Takip</Text>
           <Text style={styles.title}>Takip listesi</Text>
           <Text style={styles.subtitle}>
-            Lovable veya local server baglantisi olmadan calisan Expo baslangici.
+            Telefonda kalici kayit tutan, local server baglantisiz Expo app.
           </Text>
         </View>
 

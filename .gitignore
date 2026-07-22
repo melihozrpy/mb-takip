@@ -4,6 +4,7 @@ dist/
 dist-test/
 dist-test-sdk54/
 dist-native-check/
+dist-247-check/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
