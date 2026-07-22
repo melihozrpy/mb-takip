@@ -3,7 +3,9 @@ node_modules/
 dist/
 dist-test/
 dist-test-sdk54/
+dist-native-check/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 expo.log
+package-lock.json

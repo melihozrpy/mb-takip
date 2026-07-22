@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Track My Way",
-    "slug": "track-my-way",
+    "name": "MB Takip",
+    "slug": "mb-takip",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "trackmyway",
+    "scheme": "mbtakip",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kral.trackmyway"
+      "bundleIdentifier": "com.melihozrpy.mbtakip"
     },
     "android": {
-      "package": "com.kral.trackmyway"
+      "package": "com.melihozrpy.mbtakip"
     },
     "web": {
       "bundler": "metro"

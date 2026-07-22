@@ -1,98 +1,113 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { WebView } from 'react-native-webview';
 
-const APP_URL = 'https://preview--track-my-way-13.lovable.app';
+const initialItems = [
+  { id: '1', title: 'Uygulama GitHub reposu hazir', done: true },
+  { id: '2', title: 'Kalici backend secilecek', done: false },
+  { id: '3', title: 'iOS build TestFlight icin alinacak', done: false }
+];
 
 export default function App() {
-  const webViewRef = useRef(null);
-  const [canGoBack, setCanGoBack] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [items, setItems] = useState(initialItems);
+  const [draft, setDraft] = useState('');
 
-  const reload = () => {
-    setHasError(false);
-    webViewRef.current?.reload();
+  const completedCount = useMemo(
+    () => items.filter((item) => item.done).length,
+    [items]
+  );
+
+  const addItem = () => {
+    const title = draft.trim();
+    if (!title) return;
+
+    setItems((current) => [
+      { id: `${Date.now()}`, title, done: false },
+      ...current
+    ]);
+    setDraft('');
+  };
+
+  const toggleItem = (id) => {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item
+      )
+    );
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Geri"
-          disabled={!canGoBack}
-          onPress={() => webViewRef.current?.goBack()}
-          style={[styles.iconButton, !canGoBack && styles.disabledButton]}
-        >
-          <Text style={styles.iconText}>‹</Text>
-        </Pressable>
+      <StatusBar style="light" />
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Text style={styles.kicker}>MB Takip</Text>
+          <Text style={styles.title}>Takip listesi</Text>
+          <Text style={styles.subtitle}>
+            Lovable veya local server baglantisi olmadan calisan Expo baslangici.
+          </Text>
+        </View>
 
-        <Text numberOfLines={1} style={styles.title}>
-          Track My Way
-        </Text>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Yenile"
-          onPress={reload}
-          style={styles.iconButton}
-        >
-          <Text style={styles.iconText}>↻</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.content}>
-        {hasError ? (
-          <View style={styles.errorState}>
-            <Text style={styles.errorTitle}>Sayfa açılamadı</Text>
-            <Text style={styles.errorText}>
-              İnternet bağlantını veya hedef adresi kontrol edip tekrar dene.
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={reload}
-              style={styles.retryButton}
-            >
-              <Text style={styles.retryText}>Tekrar dene</Text>
-            </Pressable>
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{items.length}</Text>
+            <Text style={styles.statLabel}>Toplam</Text>
           </View>
-        ) : (
-          <WebView
-            ref={webViewRef}
-            source={{ uri: APP_URL }}
-            originWhitelist={['https://*']}
-            javaScriptEnabled
-            domStorageEnabled
-            sharedCookiesEnabled
-            allowsBackForwardNavigationGestures
-            startInLoadingState
-            onError={() => setHasError(true)}
-            onHttpError={(event) => {
-              if (event.nativeEvent.statusCode >= 500) {
-                setHasError(true);
-              }
-            }}
-            onNavigationStateChange={(navState) => {
-              setCanGoBack(navState.canGoBack);
-            }}
-            renderLoading={() => (
-              <View style={styles.loading}>
-                <ActivityIndicator color="#0f766e" size="large" />
-              </View>
-            )}
-            style={styles.webView}
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{completedCount}</Text>
+            <Text style={styles.statLabel}>Tamam</Text>
+          </View>
+        </View>
+
+        <View style={styles.inputRow}>
+          <TextInput
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Yeni takip maddesi"
+            placeholderTextColor="#64748b"
+            returnKeyType="done"
+            onSubmitEditing={addItem}
+            style={styles.input}
           />
-        )}
-      </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={addItem}
+            style={styles.addButton}
+          >
+            <Text style={styles.addButtonText}>Ekle</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.list}>
+          {items.map((item) => (
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: item.done }}
+              key={item.id}
+              onPress={() => toggleItem(item.id)}
+              style={styles.item}
+            >
+              <View style={[styles.check, item.done && styles.checkDone]}>
+                <Text style={styles.checkText}>{item.done ? 'OK' : ''}</Text>
+              </View>
+              <Text style={[styles.itemText, item.done && styles.itemDone]}>
+                {item.title}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -100,88 +115,121 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#0f172a'
+  },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: 36
   },
   header: {
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderBottomColor: '#d9e2ec',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    gap: 8,
-    height: 52,
-    justifyContent: 'space-between',
-    paddingHorizontal: 12
+    paddingTop: 18,
+    paddingBottom: 22
   },
-  iconButton: {
-    alignItems: 'center',
-    borderColor: '#cbd5e1',
-    borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    height: 36,
-    justifyContent: 'center',
-    width: 42
-  },
-  disabledButton: {
-    opacity: 0.35
-  },
-  iconText: {
-    color: '#0f172a',
-    fontSize: 26,
-    lineHeight: 28
+  kicker: {
+    color: '#5eead4',
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 8
   },
   title: {
+    color: '#ffffff',
+    fontSize: 32,
+    fontWeight: '800',
+    marginBottom: 8
+  },
+  subtitle: {
+    color: '#cbd5e1',
+    fontSize: 15,
+    lineHeight: 22
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 18
+  },
+  statBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    flex: 1,
+    padding: 16
+  },
+  statValue: {
+    color: '#0f172a',
+    fontSize: 28,
+    fontWeight: '800'
+  },
+  statLabel: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 3
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 18
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
     color: '#0f172a',
     flex: 1,
-    fontSize: 17,
-    fontWeight: '700',
-    textAlign: 'center'
+    fontSize: 16,
+    minHeight: 48,
+    paddingHorizontal: 14
   },
-  content: {
-    flex: 1,
-    backgroundColor: '#ffffff'
+  addButton: {
+    alignItems: 'center',
+    backgroundColor: '#14b8a6',
+    borderRadius: 8,
+    justifyContent: 'center',
+    minHeight: 48,
+    paddingHorizontal: 18
   },
-  webView: {
-    flex: 1,
-    backgroundColor: '#ffffff'
+  addButtonText: {
+    color: '#042f2e',
+    fontSize: 15,
+    fontWeight: '800'
   },
-  loading: {
-    ...StyleSheet.absoluteFillObject,
+  list: {
+    gap: 10
+  },
+  item: {
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    justifyContent: 'center'
-  },
-  errorState: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24
-  },
-  errorTitle: {
-    color: '#0f172a',
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center'
-  },
-  errorText: {
-    color: '#475569',
-    fontSize: 15,
-    lineHeight: 21,
-    marginBottom: 18,
-    textAlign: 'center'
-  },
-  retryButton: {
-    backgroundColor: '#0f766e',
     borderRadius: 8,
-    minWidth: 132,
-    paddingHorizontal: 18,
-    paddingVertical: 11
+    flexDirection: 'row',
+    gap: 12,
+    minHeight: 58,
+    padding: 14
   },
-  retryText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
-    textAlign: 'center'
+  check: {
+    alignItems: 'center',
+    borderColor: '#94a3b8',
+    borderRadius: 6,
+    borderWidth: 2,
+    height: 28,
+    justifyContent: 'center',
+    width: 28
+  },
+  checkDone: {
+    backgroundColor: '#14b8a6',
+    borderColor: '#14b8a6'
+  },
+  checkText: {
+    color: '#042f2e',
+    fontSize: 10,
+    fontWeight: '900'
+  },
+  itemText: {
+    color: '#0f172a',
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700'
+  },
+  itemDone: {
+    color: '#64748b',
+    textDecorationLine: 'line-through'
   }
 });

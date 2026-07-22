@@ -1,6 +1,6 @@
-# Track My Way Expo
+# MB Takip
 
-Bu proje `https://preview--track-my-way-13.lovable.app` adresini Expo Go içinde iOS uygulaması gibi açan hafif bir WebView kabuğudur.
+Local server veya Lovable preview adresine bagli olmayan Expo baslangic uygulamasi.
 
 ## Çalıştırma
 
@@ -15,4 +15,4 @@ Terminalde QR kod çıkınca iPhone'da Expo Go ile okut.
 
 - Bu yapı Expo Go ile test/kullanım içindir.
 - App Store'a gönderilecek bağımsız iOS uygulaması için daha sonra EAS Build gerekir.
-- Hedef URL değişirse `App.js` içindeki `APP_URL` değerini güncelle.
+- 7/24 calisacak veri ve hesap sistemi icin cloud backend eklenmelidir.
